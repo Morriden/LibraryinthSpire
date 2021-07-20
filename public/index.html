@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
 
+
   <head>
     <title>The Libraryinth</title>
     <style>
@@ -45,100 +46,102 @@
           <input id="m" autocomplete="off" /><button>Chat</button>
         </form>
       </div>
+
     </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      (function() {
-        const socket = io();
-        let connected;
-        // can be used for auto login if token is present
-        if(sessionStorage.getItem('session')){
-          socket.emit('authenticate', sessionStorage.getItem('session'));
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    (function () {
+      const socket = io();
+      let connected;
+      // can be used for auto login if token is present
+      if (sessionStorage.getItem('session')) {
+        socket.emit('authenticate', sessionStorage.getItem('session'));
+      }
+
+      // let nick = prompt('What is your desired username?');
+      const chatform = document.getElementById("chatform");
+      const gameform = document.getElementById("gameform");
+      const chatinput = document.getElementById("m");
+      const gameinput = document.getElementById("gm");
+
+      // add eventListenser to the form
+      chatform.addEventListener('submit', e => {
+        e.preventDefault();
+        const m = document.getElementById('m');
+        if (m.value === '') return false;
+        socket.emit('chat', m.value);
+        m.value = '';
+        return false
+      });
+
+      gameform.addEventListener('submit', e => {
+        e.preventDefault();
+        const m = document.getElementById('gm');
+        if (m.value === '') return false;
+        socket.emit('game', m.value);
+        m.value = '';
+        return false
+      });
+
+      chatinput.addEventListener('focus', e => {
+        if (!connected) socket.emit('joinchat')
+        connected = true;
+      });
+
+      gameinput.addEventListener('focus', e => {
+        if (!connected) socket.emit('joinchat')
+        connected = true;
+      });
+
+      socket.on('connect', () => {
+        if (connected) socket.emit('joinchat');
+        let li = document.createElement('li');
+        li.textContent = '> Connected to server';
+        li.className = 'system';
+
+        document.getElementById('chatMessages').appendChild(li);
+        document.getElementById('chatMessages').scrollTo(0, 999999);
+      });
+
+      socket.on('disconnect', () => {
+        let li = document.createElement('li');
+        li.textContent = '> Disconnected from server';
+        li.className = 'system';
+
+        document.getElementById('chatMessages').appendChild(li);
+        document.getElementById('chatMessages').scrollTo(0, 999999);
+      });
+
+      socket.on('authenticated', function (data) {
+        sessionStorage.setItem('session', data)
+      });
+
+      // grab anything emitted to 'chat'
+      socket.on('chat', function (data) {
+
+        // create li and set properties from emitted message
+        let li = document.createElement('li');
+        // prevent clients from writing html in chat
+        console.log(data);
+        if (data?.html) {
+          li.innerHTML = data?.msg || 'error - unknown command';
+        } else {
+          li.textContent = data?.msg || 'error - unknown command';
         }
+        if (data?.color) li.style.color = data.color;
+        li.className = 'default';
+        if (data?.style) li.className = data.style;
 
-        // let nick = prompt('What is your desired username?');
-        const chatform = document.getElementById("chatform");
-        const gameform = document.getElementById("gameform");
-        const chatinput = document.getElementById("m");
-        const gameinput = document.getElementById("gm");
-        
-        // add eventListenser to the form
-        chatform.addEventListener('submit', e => {
-          e.preventDefault();
-          const m = document.getElementById('m');
-          if(m.value === '') return false;
-          socket.emit('chat', m.value);
-          m.value = '';
-          return false
-        });
+        // display the emitted message
+        document.getElementById('chatMessages').appendChild(li);
+        document.getElementById('chatMessages').scrollTo(0, 999999);
+        // set background if exists
+        if (data.background) document.getElementById('body').style.background = data.background;
 
-        gameform.addEventListener('submit', e => {
-          e.preventDefault();
-          const m = document.getElementById('gm');
-          if(m.value === '') return false;
-          socket.emit('game', m.value);
-          m.value = '';
-          return false
-        });
-
-        chatinput.addEventListener('focus', e => {
-          if(!connected) socket.emit('joinchat')
-          connected = true;
-        });
-
-        gameinput.addEventListener('focus', e => {
-          if(!connected) socket.emit('joinchat')
-          connected = true;
-        });
-
-        socket.on('connect', () => {
-          if(connected) socket.emit('joinchat');
-          let li = document.createElement('li');
-          li.textContent = '> Connected to server';
-          li.className = 'system';
-
-          document.getElementById('chatMessages').appendChild(li);
-          document.getElementById('chatMessages').scrollTo(0, 999999);
-        });
-
-        socket.on('disconnect', () => {
-          let li = document.createElement('li');
-          li.textContent = '> Disconnected from server';
-          li.className = 'system';
-
-          document.getElementById('chatMessages').appendChild(li);
-          document.getElementById('chatMessages').scrollTo(0, 999999);
-        });
-
-        socket.on('authenticated', function(data){
-          sessionStorage.setItem('session', data)
-        });
-
-        // grab anything emitted to 'chat'
-        socket.on('chat', function(data){
-
-          // create li and set properties from emitted message
-          let li = document.createElement('li');
-          // prevent clients from writing html in chat
-          console.log(data);
-          if(data?.html) {
-            li.innerHTML = data?.msg || 'error - unknown command';
-          } else {
-            li.textContent = data?.msg || 'error - unknown command';
-          }
-          if(data?.color) li.style.color = data.color;
-          li.className = 'default';
-          if(data?.style) li.className = data.style;
-
-          // display the emitted message
-          document.getElementById('chatMessages').appendChild(li);
-          document.getElementById('chatMessages').scrollTo(0, 999999);
-          // set background if exists
-          if(data.background) document.getElementById('body').style.background = data.background;
-
-        });
-        // grab anything emitted to 'chat'
-        socket.on('game', function(data){
+      });
+      // grab anything emitted to 'chat'
+      socket.on('game', function (data) {
 
         // example of data
         exampleData: {
@@ -150,14 +153,14 @@
         console.log(data);
         // create li and set properties from emitted message
         let li = document.createElement('li');
-        if(data?.html) {
-            li.innerHTML = data?.msg || 'error - unknown command';
-          } else {
-            li.textContent = data?.msg || 'error - unknown command';
-          }
-        if(data?.color) li.style.color = data.color;
+        if (data?.html) {
+          li.innerHTML = data?.msg || 'error - unknown command';
+        } else {
+          li.textContent = data?.msg || 'error - unknown command';
+        }
+        if (data?.color) li.style.color = data.color;
         li.className = 'default';
-        if(data?.style) li.className = data.style;
+        if (data?.style) li.className = data.style;
 
         // display the emitted message
         document.getElementById('gameMessages').appendChild(li);
@@ -166,9 +169,11 @@
         // set background if exists
         if (data.background) document.getElementById('body').style.background = data.background;
 
+
       });
     })();
   </script>
 </body>
+
 
 </html>

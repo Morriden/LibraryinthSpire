@@ -200,6 +200,10 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('game', () => {
+    socket.emit('game', { msg: 'you are in a dark room. You are unable to move and can\'t see anything.' });
+  });
+
   // clear timeout on disconnect
   socket.on('disconnect', (reason) => {
     console.log(`${socket.handshake.time}: ${socket.handshake.address} - ${socket.id} (${socket.request.user.username}) disconnected. Reason: ${reason}.`);
