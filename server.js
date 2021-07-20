@@ -98,6 +98,7 @@ io.on('connection', (socket) => {
     socket.emit('game', motd);
   }, 1600);
 
+
   socket.on('joinchat', () => {
     socket.join('chat', () => {
       if(!socket.request.chat) {
@@ -161,6 +162,7 @@ io.on('connection', (socket) => {
         }))
         .catch(err => socket.emit('chat', err));
     }
+
   });
 
   // left col - The Game Window
@@ -196,10 +198,6 @@ io.on('connection', (socket) => {
         })
         .catch(err => socket.emit('game', err));
     }
-  });
-
-  socket.on('game', () => {
-    socket.emit('game', { msg: 'you are in a dark room. You are unable to move and can\'t see anything.' });
   });
 
   // clear timeout on disconnect
