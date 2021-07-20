@@ -98,6 +98,7 @@ io.on('connection', (socket) => {
     socket.emit('game', motd);
   }, 1600);
 
+
   socket.on('joinchat', () => {
     socket.join('chat', () => {
       if(!socket.request.chat) {
@@ -161,6 +162,7 @@ io.on('connection', (socket) => {
         }))
         .catch(err => socket.emit('chat', err));
     }
+
   });
 
   // left col - The Game Window
