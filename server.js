@@ -200,9 +200,13 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('game', () => {
-    socket.emit('game', { msg: 'you are in a dark room. You are unable to move and can\'t see anything.' });
-  });
+  // socket.on('game', () => {
+  //   socket.emit('game', { msg: 'you are in a dark room. You are unable to move and can\'t see anything.' });
+  // });
+
+  // socket.on('game', () => {
+  //   socket.emit('game', { msg: 'you are in a dark room. You are unable to move and can\'t see anything.' });
+  // });
 
   // clear timeout on disconnect
   socket.on('disconnect', (reason) => {
